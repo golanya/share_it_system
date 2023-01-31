@@ -1,0 +1,10 @@
+tr.hide-table-padding td {
+  padding: 0;
+}
+
+.alert-top {
+  position: fixed;
+  top: 5px;
+  left: 2%;
+  width: 96%;
+}

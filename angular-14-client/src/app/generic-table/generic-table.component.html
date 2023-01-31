@@ -1,0 +1,108 @@
+<div class="container ">
+  <header class="">
+    <div
+      class="card scrollbar scrollbar-primary w-100" 
+      *ngIf="table_attrs.entry_info.length > 0"
+      [attr.style]="table_attrs.height"
+    >
+      <table class="table table-hover" >
+        <thead >
+          <tr>
+            <th scope="col" *ngFor="let attr_name of table_attrs.headers">
+              {{ attr_name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody *ngFor="let ent_info of table_attrs.entry_info; let i = index" >
+          <tr class="card-header">
+            <th class="col-sm-1">{{ i + 1 }}</th>
+            <td
+              class="col-md-2"
+              *ngFor="let attr_name of table_attrs.headers.slice(1)"
+            >
+              {{ ent_info[headers2model_attr[attr_name]] }}
+            </td>
+            <td class="col-sm-2">
+              <div class="row">
+                <div *ngIf="table_attrs.is_collapsable">
+                  <aside>
+                    <i
+                      class="fa-solid fa-eye-slash btn"
+                      *ngIf="ent_info.show"
+                      (click)="collapse(i)"
+                    ></i>
+                    <i
+                      class="fa-solid fa-eye btn {{(!ent_info.seen && post_collaps_func) ? 'btn-outline-info': ''}}"
+                      *ngIf="!ent_info.show"
+                      (click)="expand(i, post_collaps_func)"
+                    ></i>
+                  </aside>
+                </div>
+
+                <div *ngFor="let elem of functions || []" class="btn">
+                  <i class="{{ elem.icon }}" (click)="elem.action(i)"></i>
+                </div>
+
+                <div *ngIf="ent_info.function" class="btn">
+                  <i
+                    class="{{ ent_info.function.icon }}"
+                    (click)="ent_info.function.action(i)"
+                  ></i>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="table_attrs.is_collapsable" class="hide-table-padding">
+            <td [attr.colspan]="table_attrs.headers.length">
+              <div class="collapsible" [@collapse]="!ent_info.show">
+                <div *ngFor="let attr_name of table_attrs.card_attrs">
+                  <div
+                    class="row"
+                    *ngIf="ent_info[headers2model_attr[attr_name]]"
+                  >
+                    <div class="col-4">
+                      <h6 class="mb-0">{{ attr_name }}</h6>
+                    </div>
+                    <div
+                      *ngIf="headers2model_attr[attr_name] !== 'link'"
+                      class="col-7 text-secondary"
+                    >
+                      {{ ent_info[headers2model_attr[attr_name]] }}
+                    </div>
+                    <div
+                      *ngIf="headers2model_attr[attr_name] === 'link'"
+                      class="col-7 text-secondary"
+                    >
+                      <a
+                        [routerLink]="['/' + ent_info.link]"
+                        routerLinkActive="active"
+                        class="link-info mx-2 flex-fill bd-highlight"
+                      >
+                        <u>go to tool page</u>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <hr />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="jumbotron text-justify justify-content-center d-flex"
+      *ngIf="table_attrs.entry_info.length == 0 && !err_msg"
+    >
+      <i class="" aria-hidden="true">No data to display</i>
+    </div>
+    <div
+      class="alert alert-danger text-justify justify-content-center d-flex"
+      role="alert"
+      *ngIf="table_attrs.entry_info.length == 0 && err_msg"
+    >
+      <i class="" aria-hidden="true">{{ err_msg }}</i>
+    </div>
+  </header>
+</div>

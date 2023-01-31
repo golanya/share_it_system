@@ -1,0 +1,583 @@
+<!-- display tool was not found in case of !tool_info -->
+<div class="container">
+  <aside class="w-100 mt-0">
+    <div class="alert alert-success w-100" [@fade]="isActionSucceed">
+      {{ action_msg }}
+    </div>
+
+    <div class="alert alert-danger w-100" [@fade]="isActionFailed">
+      {{ action_msg }}
+    </div>
+  </aside>
+
+  <nav aria-label="breadcrumb" class="main-breadcrumb">
+    <ol class="breadcrumb">
+      <h3>{{ tool_info.name }} page</h3>
+    </ol>
+  </nav>
+  <div class="row m-1">
+    <!-- Tool info + delete button + current borrow if exist -->
+    <div class="col-md-4 border-left border-right">
+      <div class="mb-3 h-100">
+        <div class="card-body">
+          <div *ngIf="!edit_state">
+            <h5 class="card-title">Tool details</h5>
+            <div class="table">
+              <div *ngFor="let attr of tool_info_to_display" class="row">
+                <div class="col">
+                  <b>{{ attr }}:</b>
+                </div>
+                <div class="col">
+                  {{ tool_info[request_model_attr2headers[attr]] }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="edit_state">
+            <form
+              name="tool_form"
+              (ngSubmit)="f.form.valid && save_changes()"
+              #f="ngForm"
+              novalidate
+            >
+              <div class="form-group">
+                <label for="name">Tool name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="name"
+                  [(ngModel)]="tool_form.name"
+                  required
+                  minlength="2"
+                  maxlength="20"
+                  #name="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && name.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="name.errors && f.submitted"
+                >
+                  <div *ngIf="name.errors['required']">
+                    First name is required
+                  </div>
+                  <div *ngIf="name.errors['minlength']">
+                    First name must be at least 2 characters
+                  </div>
+                  <div *ngIf="name.errors['maxlength']">
+                    First name must be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="manufacturing_date">Manufacturing Date</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  name="manufacturing_date"
+                  [(ngModel)]="tool_form.manufacturing_date"
+                  required
+                  pattern="\d+"
+                  maxlength="4"
+                  max="{{ current_year }}"
+                  #manufacturing_date="ngModel"
+                  [ngClass]="{
+                    'is-invalid': f.submitted && manufacturing_date.errors
+                  }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="manufacturing_date.errors && f.submitted"
+                >
+                  <div *ngIf="manufacturing_date.errors['required']">
+                    Manufacturing Date is required
+                  </div>
+                  <div
+                    *ngIf="
+                      manufacturing_date.errors['pattern'] ||
+                      manufacturing_date.errors['maxlength']
+                    "
+                  >
+                    Manufacturing Date must be 4 digits year, e.g: 1995
+                  </div>
+                  <div *ngIf="manufacturing_date.errors['max']">
+                    Manufacturing Date must be smaller than the current year
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select
+                  required
+                  name="status"
+                  class="form-control"
+                  #status="ngModel"
+                  [(ngModel)]="tool_form.status"
+                  [ngClass]="{ 'is-invalid': f.submitted && status.errors }"
+                >
+                  <option value="{{ statuses[0] }}">{{ statuses[0] }}</option>
+                  <option
+                    *ngFor="let attr of statuses.slice(1)"
+                    value="{{ attr }}"
+                  >
+                    {{ attr }}
+                  </option>
+                </select>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="status.errors && f.submitted"
+                >
+                  <div *ngIf="status.errors['required']">
+                    Status is required
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="max_time_borrow">Max Borrow Time (days)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="max_time_borrow"
+                  [(ngModel)]="tool_form.max_time_borrow"
+                  required
+                  pattern="[1-9]\d*"
+                  minlength="1"
+                  maxlength="20"
+                  #max_time_borrow="ngModel"
+                  [ngClass]="{
+                    'is-invalid': f.submitted && max_time_borrow.errors
+                  }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="max_time_borrow.errors && f.submitted"
+                >
+                  <div *ngIf="max_time_borrow.errors['required']">
+                    Max Borrow Time is required
+                  </div>
+                  <div *ngIf="max_time_borrow.errors['minlength']">
+                    Max Borrow Time must be at least 1 day
+                  </div>
+                  <div *ngIf="max_time_borrow.errors['pattern']">
+                    Max Borrow Time must be positive a number
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="categories">Categories</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="categories"
+                  [(ngModel)]="tool_form.categories"
+                  maxlength="50"
+                  #categories="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && categories.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="categories.errors && f.submitted"
+                >
+                  <div *ngIf="categories.errors['maxlength']">
+                    Categories must be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="producer">Producer</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="producer"
+                  [(ngModel)]="tool_form.producer"
+                  maxlength="20"
+                  #producer="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && producer.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="producer.errors && f.submitted"
+                >
+                  <div *ngIf="producer.errors['maxlength']">
+                    Producer must be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="description">Decription</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="description"
+                  [(ngModel)]="tool_form.description"
+                  maxlength="20"
+                  #description="ngModel"
+                  [ngClass]="{
+                    'is-invalid': f.submitted && description.errors
+                  }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="description.errors && f.submitted"
+                >
+                  <div *ngIf="description.errors['maxlength']">
+                    Decription can be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <button
+                    class="btn mr-5 btn-outline-danger form-control btn-block"
+                    (click)="closeForm()"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div class="col">
+                  <button
+                    id="btnSubmit"
+                    class="btn btn-outline-primary form-control btn-block"
+                    type="submit"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div *ngIf="tool_info.is_my_tool">
+          <div
+            class="m-3 row"
+            *ngIf="tool_info.status !== 'loaned'; else prevent_delete"
+          >
+            <div *ngIf="!edit_state" class="row w-100">
+              <button
+                (click)="delete_tool()"
+                class="mr-4 col btn btn-outline-danger align-self-start"
+              >
+                Delete tool
+              </button>
+              <button
+                (click)="edit_state = true"
+                class="ml-5 col btn btn-outline-primary align-self-end"
+              >
+                Edit tool
+              </button>
+            </div>
+          </div>
+          <div class="m-3">
+            <ng-template #prevent_delete>
+              <p class="text-warning">
+                *Loaned tool can not be deleted or edited...
+              </p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col border-right" *ngIf="requests.approved">
+      <div class="mb-3 h-100">
+        <div class="card-body table">
+          <h5 class="card-title">Current borrow info</h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            <div
+              class="timer"
+              *ngIf="approved_borrow_left_time$ | async as t; else sorry"
+            >
+              <span>Expired in:</span>
+              <span id="hours"> {{ t.hoursToDday }} </span>:
+              <span id="minutes"> {{ t.minutesToDday }} </span>:
+              <span id="seconds"> {{ t.secondsToDday }} </span>
+            </div>
+            <ng-template #sorry> Calculating expiration date... </ng-template>
+          </h6>
+          <div
+            class="row"
+            *ngFor="let request_attr of requests.approved_list_attrs"
+          >
+            <dt class="col-sm-4">{{ request_attr }}</dt>
+            <dd class="col-sm-8">
+              {{ requests.approved[request_model_attr2headers[request_attr]] }}
+            </dd>
+          </div>
+          <dl
+            *ngIf="
+              (requests.my === requests.approved &&
+                !requests.approved.my_feedback) ||
+              (tool_info.is_my_tool && !requests.approved.owner_feedback)
+            "
+            class="row"
+          >
+            <dt class="col-sm-4">Encourage peer</dt>
+            <dd class="col-sm-8">
+              <i
+                (click)="feedback_peer(true)"
+                class="btn fa fa-thumbs-up btn-outline-success"
+                aria-hidden="true"
+                disabled="disabled"
+              ></i>
+              <i
+                (click)="feedback_peer(false)"
+                class="ml-3 btn fas fa-thumbs-down btn-outline-danger"
+              ></i>
+            </dd>
+          </dl>
+
+          <button
+            (click)="finish_loan()"
+            *ngIf="tool_info.is_my_tool"
+            class="btn btn-outline-primary"
+          >
+            Finish the loan
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Ask for borrow section -->
+    <div
+      class="col border-right"
+      *ngIf="
+        !tool_info.is_my_tool &&
+        !requests.my &&
+        tool_info.status !== 'not available' &&
+        !suspended_user
+      "
+    >
+      <div class="card-body h-100">
+        <h5 class="card-title">Request to borrow</h5>
+        <form
+          name="form"
+          (ngSubmit)="f.form.valid && open_new_request()"
+          #f="ngForm"
+          novalidate
+        >
+          <div class="form-group">
+            <label for="expiration_date">Expiration Date</label>
+            <input
+              type="date"
+              class="form-control"
+              data-provide="datepicker"
+              name="expiration_date"
+              onkeydown="return false"
+              [(ngModel)]="form.expiration_date"
+              required
+              [attr.min]="today"
+              #expiration_date="ngModel"
+              [ngClass]="{
+                'is-invalid': f.submitted && expiration_date.errors
+              }"
+            />
+            <div
+              *ngIf="expiration_date.errors && f.submitted"
+              class="invalid-feedback"
+            >
+              Expiration Date is required!
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="borrow_duration">Borrow Duration</label>
+            <input
+              type="number"
+              class="form-control"
+              name="borrow_duration"
+              [(ngModel)]="form.borrow_duration"
+              required
+              min="1"
+              max="{{ tool_info.max_time_borrow }}"
+              #borrow_duration="ngModel"
+              [ngClass]="{
+                'is-invalid': f.submitted && borrow_duration.errors
+              }"
+            />
+            <div
+              *ngIf="borrow_duration.errors && f.submitted"
+              class="invalid-feedback"
+            >
+              <div *ngIf="borrow_duration.errors['required']">
+                Borrow Duration is required
+              </div>
+              <div
+                *ngIf="
+                  borrow_duration.errors['min'] || borrow_duration.errors['max']
+                "
+              >
+                Borrow Duration must be between 1 to
+                {{ tool_info.max_time_borrow }} days
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="content">Free text</label>
+            <input
+              type="content"
+              class="form-control"
+              name="content"
+              placeholder="Hi there... can I borrow your tool please?"
+              [(ngModel)]="form.content"
+              #content="ngModel"
+              [ngClass]="{ 'is-invalid': f.submitted && content.errors }"
+            />
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary btn-block">Request</button>
+          </div>
+          <div class="form-group"></div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="col border-right"
+      *ngIf="requests.my && requests.my.status === 'pending'"
+    >
+      <div class="card-body">
+        <h5 class="card-title">Your request is {{ requests.my.status }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">
+          <div
+            class="timer"
+            *ngIf="pending_borrow_left_time$ | async as t; else sorry"
+          >
+            <span>Expired in:</span>
+            <span id="hours"> {{ t.hoursToDday }} </span>:
+            <span id="minutes"> {{ t.minutesToDday }} </span>:
+            <span id="seconds"> {{ t.secondsToDday }} </span>
+          </div>
+          <ng-template #sorry> Calculating expiration date... </ng-template>
+        </h6>
+        <div
+          class="row"
+          *ngFor="let request_attr of requests.pending_list_attrs"
+        >
+          <dt class="col-sm-5 card-text">{{ request_attr }}</dt>
+          <dd class="col-sm-6 card-text">
+            {{ requests.my[request_model_attr2headers[request_attr]] }}
+          </dd>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-danger mt-5"
+          (click)="delete_pending_request()"
+        >
+          Withdraw request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-5 mx-1">
+    <header *ngIf="tool_info.is_my_tool" class="w-100">
+      <h5 class="card-title">Tool's requests</h5>
+      <div *ngIf="requests.open.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col" *ngFor="let attr_name of requests.headers">
+                {{ attr_name }}
+              </th>
+            </tr>
+          </thead>
+          <tbody *ngFor="let ent_info of requests.open; let i = index">
+            <tr class="card-header">
+              <th scope="row">{{ i + 1 }}</th>
+              <td *ngFor="let attr_name of requests.headers.slice(1)">
+                {{ ent_info[request_model_attr2headers[attr_name]] }}
+              </td>
+              <td>
+                <div class="row">
+                  <aside>
+                    <i
+                      class="fa-solid fa-eye-slash btn m1-2 flex-fill bd-highlight"
+                      *ngIf="ent_info.show"
+                      (click)="collapse(i, 'open')"
+                    ></i>
+                    <i
+                      class="fa-solid fa-eye btn flex-fill bd-highlight"
+                      *ngIf="!ent_info.show"
+                      (click)="expand(i, 'open')"
+                    ></i>
+                  </aside>
+                  <button
+                    *ngIf="tool_info.status === 'available'"
+                    (click)="approve_borrow(i)"
+                    type="button"
+                    class="btn btn-outline-primary mx-2 bd-highlight"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    (click)="reject_borrow(i)"
+                    type="button"
+                    class="btn btn-outline-secondary bd-highlight"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td [attr.colspan]="requests.headers.length">
+                <div class="collapsible" [@collapse]="!ent_info.show">
+                  <div *ngFor="let attr_name of requests.card_attrs">
+                    <div
+                      class="row"
+                      *ngIf="ent_info[request_model_attr2headers[attr_name]]"
+                    >
+                      <div class="col-sm-3">
+                        <h6 class="mb-0">{{ attr_name }}</h6>
+                      </div>
+                      <div class="col-sm-9 text-secondary">
+                        {{ ent_info[request_model_attr2headers[attr_name]] }}
+                      </div>
+                    </div>
+                  </div>
+                  <hr />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="jumbotron text-justify justify-content-center d-flex"
+        *ngIf="requests.open.length == 0"
+      >
+        <i class="" aria-hidden="true">There are no open requests</i>
+      </div>
+    </header>
+  </div>
+  <div class="row mt-5 mx-1">
+    <h5 class="card-title">Tool's history</h5>
+    <header class="w-100">
+      <div *ngIf="tool_info.history && tool_info.history.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                *ngFor="let attr_name of tool_history_to_display | keyvalue"
+              >
+                {{ attr_name.key }}
+              </th>
+            </tr>
+          </thead>
+          <tbody *ngFor="let ent_info of tool_info.history">
+            <tr class="card-header">
+              <td *ngFor="let attr_name of tool_history_to_display | keyvalue">
+                {{ ent_info[attr_name.value] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="w-100 jumbotron text-justify justify-content-center d-flex"
+        *ngIf="!tool_info.history || tool_info.history.length === 0"
+      >
+        <i class="" aria-hidden="true">There's no tool history</i>
+      </div>
+    </header>
+  </div>
+</div>

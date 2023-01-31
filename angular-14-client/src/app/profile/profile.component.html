@@ -1,0 +1,355 @@
+<div class="container" *ngIf="current_user; else loggedOut">
+  <aside class="w-100 mt-0">
+    <div class="alert alert-success w-100" [@fade]="isActionSucceed">
+      {{ action_msg }}
+    </div>
+
+    <div class="alert alert-danger w-100" [@fade]="isActionFailed">
+      {{ action_msg }}
+    </div>
+  </aside>
+
+  <div class="main-body">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="main-breadcrumb">
+      <ol class="breadcrumb">
+        <h3>{{ current_user.full_name }}'s profile</h3>
+      </ol>
+    </nav>
+    <!-- /Breadcrumb -->
+
+    <div class="row gutters-sm">
+      <div class="col-md-2 mb-3">
+        <div class="card h-75">
+          <div class="card-body">
+            <div class="d-flex flex-column align-items-center text-center">
+              <img
+                src="../../assets/images/user.png"
+                class="rounded-circle"
+                width="150"
+              />
+            </div>
+            <div *ngIf="current_user.description || current_user.job; else no_description">
+              <h6 class="card-subtitle mb-2 text-muted mt-3">{{ current_user.job }}</h6>
+              <p class="card-text">{{ current_user.description }}</p>
+            </div>
+            <div>
+              <ng-template #no_description>
+                <p class="mt-4 text-secondary">
+                  Description was not provided...
+                </p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="">
+            <aside>
+              <a
+                *ngIf="!edit_state"
+                class="btn btn-info w-100"
+                (click)="edit_user()"
+                >Edit</a
+              >
+              <div *ngIf="edit_state" class="row ml-1">
+                <a
+                  class="col"
+                  class="m-1 btn btn-danger w-100"
+                  (click)="cancel_changes()"
+                  >Cancel</a
+                >
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5 mb-3">
+        <div class="card mb-3 h-100">
+          <div *ngIf="!edit_state" class="card-body">
+            <div *ngFor="let attr of user_properties | keyvalue">
+              <div class="row">
+                <div class="col">
+                  <h6 class="mb-0">{{ attr.key }}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                  {{ current_user[attr.value] }}
+                </div>
+              </div>
+              <hr />
+            </div>
+          </div>
+          <div *ngIf="edit_state" class="card-body">
+            <form
+              *ngIf="!isSuccessful"
+              name="form"
+              (ngSubmit)="f.form.valid && save_changes()"
+              #f="ngForm"
+              novalidate
+            >
+              <div class="form-group">
+                <label for="fname">*First name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="fname"
+                  [(ngModel)]="form.fname"
+                  required
+                  minlength="2"
+                  maxlength="20"
+                  #fname="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && fname.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="fname.errors && f.submitted"
+                >
+                  <div *ngIf="fname.errors['required']">
+                    First name is required
+                  </div>
+                  <div *ngIf="fname.errors['minlength']">
+                    First name must be at least 2 characters
+                  </div>
+                  <div *ngIf="fname.errors['maxlength']">
+                    First name must be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="lname">*Last name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="lname"
+                  [(ngModel)]="form.lname"
+                  required
+                  minlength="2"
+                  maxlength="20"
+                  #lname="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && lname.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="lname.errors && f.submitted"
+                >
+                  <div *ngIf="lname.errors['required']">
+                    Last name is required
+                  </div>
+                  <div *ngIf="lname.errors['minlength']">
+                    Last name must be at least 2 characters
+                  </div>
+                  <div *ngIf="lname.errors['maxlength']">
+                    Last name must be at most 20 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  [(ngModel)]="form.email"
+                  required
+                  email
+                  #email="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && email.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="email.errors && f.submitted"
+                >
+                  <div *ngIf="email.errors['required']">Email is required</div>
+                  <div *ngIf="email.errors['email']">
+                    Email must be a valid email address
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone number</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="phone"
+                  [(ngModel)]="form.phone"
+                  required
+                  minlength="10"
+                  maxlength="10"
+                  #phone="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && phone.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="phone.errors && f.submitted"
+                >
+                  <div *ngIf="phone.errors['required']">
+                    Phone number is required
+                  </div>
+                  <div
+                    *ngIf="
+                      phone.errors['minlength'] || phone.errors['maxlength']
+                    "
+                  >
+                    Phone number must be 10 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="password">New Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  [(ngModel)]="form.password"
+                  minlength="6"
+                  #password="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && password.errors }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="password.errors && f.submitted"
+                >
+                  <div *ngIf="password.errors['minlength']">
+                    Password must be at least 6 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="job">Job</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="job"
+                  [(ngModel)]="form.job"
+                  maxlength="50"
+                  #job="ngModel"
+                  [ngClass]="{ 'is-invalid': f.submitted && job.errors }"
+                />
+                <div class="invalid-feedback" *ngIf="job.errors && f.submitted">
+                  <div *ngIf="job.errors['maxlength']">
+                    Job must be at most 50 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="description"
+                  [(ngModel)]="form.description"
+                  maxlength="50"
+                  #description="ngModel"
+                  [ngClass]="{
+                    'is-invalid': f.submitted && description.errors
+                  }"
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="description.errors && f.submitted"
+                >
+                  <div *ngIf="description.errors['maxlength']">
+                    Description must be at most 50 characters
+                  </div>
+                </div>
+              </div>
+              <div class="form-group ml-3">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="allow_emails"
+                  [(ngModel)]="form.allow_emails"
+                  #allow_emails="ngModel"
+                  id="flexCheckChecked"
+                />
+                <label class="form-check-label" for="flexCheckChecked">
+                  Allow email notifications
+                </label>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary btn-block">Save changes</button>
+              </div>
+
+              <div
+                class="alert alert-warning"
+                *ngIf="f.submitted && isChangesFailed"
+              >
+                Changes save failed!<br />{{ errorMessage }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5 mb-3">
+        <div class="card mb-3 h-100">
+          <div class="card-body">
+            <h6 class="d-flex align-items-center mb-3">
+              <i class="material-icons text-info m-2"></i>My Borrows
+            </h6>
+
+            <app-generic-table
+              [table_attrs]="my_borrows_attrs"
+              [headers2model_attr]="headers2model_attr"
+              [err_msg]="err_msg"
+              [functions]="borrow_functions"
+            ></app-generic-table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row gutters-sm">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="d-flex align-items-center mb-3">
+              <i class="material-icons text-info m-2"></i>Notifications
+            </h6>
+
+            <app-generic-table
+              [table_attrs]="my_notifications_attrs"
+              [headers2model_attr]="headers2model_attr"
+              [err_msg]="err_msg"
+              [functions]="notification_functions"
+              [post_collaps_func]="post_collape_func"
+            ></app-generic-table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="d-flex align-items-center mb-3">
+              <i class="material-icons text-info m-2"></i>My Tools
+            </h6>
+
+            <app-generic-table
+              [table_attrs]="my_tools_attrs"
+              [headers2model_attr]="headers2model_attr"
+              [err_msg]="err_msg"
+              [functions]="tool_functions"
+            ></app-generic-table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row gutters-sm">
+      <div class="col-md-8 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="d-flex align-items-center mb-3">
+              <i class="material-icons text-info m-2"></i>My pending requests
+            </h6>
+
+            <app-generic-table
+              [table_attrs]="my_pending_attrs"
+              [headers2model_attr]="headers2model_attr"
+              [err_msg]="err_msg"
+              [functions]="my_pending_requests_functions"
+            ></app-generic-table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #loggedOut> Please login. </ng-template>

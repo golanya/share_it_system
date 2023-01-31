@@ -1,0 +1,14 @@
+.collapsible {
+    overflow: hidden;
+  }
+
+.center_input { 
+    text-align: center; 
+}
+
+.alert-top {
+  position: fixed;
+  top: 5px;
+  left: 2%;
+  width: 96%;
+}

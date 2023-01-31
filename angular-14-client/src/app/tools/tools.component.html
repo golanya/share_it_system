@@ -1,0 +1,260 @@
+<div class="container">
+  <aside class="w-100 mt-0">
+    <div class="alert alert-success w-100" [@fade]="isActionSucceed">
+      {{ action_msg }}
+    </div>
+
+    <div class="alert alert-danger w-100" [@fade]="isActionFailed">
+      {{ action_msg }}
+    </div>
+  </aside>
+
+  <div class="table">
+    <nav aria-label="breadcrumb" class="main-breadcrumb">
+      <ol class="breadcrumb">
+        <h3>Tools list</h3>
+      </ol>
+    </nav>
+    <div class="form-row mx-3 mt-5">
+      <div class="col-sm=2">
+        <i
+          class="fa-solid fa-plus btn btn-outline-primary"
+          (click)="openPopup()"
+          ><br /><small class="">Add tool</small></i
+        >
+      </div>
+      <form
+        class="col-md-10 form-row mx-3 d-flex justify-content-center"
+        name="form"
+        (ngSubmit)="search_regex()"
+        #f="ngForm"
+        novalidate
+      >
+        <div class="col-md-7">
+          <input
+            class="form-control mt-2"
+            type="text"
+            name="search"
+            placeholder="Search"
+            aria-label="Search"
+            [(ngModel)]="search_pattern"
+            #search="ngModel"
+            [ngClass]="{
+              'is-invalid': f.submitted && false
+            }"
+          />
+        </div>
+        <div class="col-3">
+          <button
+            id="btnSubmit"
+            type="submit"
+            class="btn btn-outline-primary w-100 mt-2"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="row mx-3 mt-5">
+      <app-generic-table
+        class="w-100"
+        [table_attrs]="table_attrs"
+        [headers2model_attr]="headers2model_attr"
+        [err_msg]="err_msg"
+        [functions]="functions"
+      ></app-generic-table>
+    </div>
+  </div>
+
+  <!-- From here is the Modal form of tool adding -->
+  <div
+    class="modal"
+    style="overflow-y: scroll"
+    tabindex="-1"
+    role="dialog"
+    *ngIf="displayStyle === 'block'"
+    [ngStyle]="{ display: 'block' }"
+  >
+    <div class="modal-dialog" role="form">
+      <div class="modal-content">
+        <div class="con p-4 modal-body">
+          <form
+            name="form"
+            (ngSubmit)="f.form.valid && onSubmit()"
+            #f="ngForm"
+            validate
+          >
+            <div class="form-group">
+              <label for="name">*Tool name</label>
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                [(ngModel)]="form.name"
+                required
+                minlength="2"
+                maxlength="20"
+                #name="ngModel"
+                [ngClass]="{ 'is-invalid': f.submitted && name.errors }"
+              />
+              <div class="invalid-feedback" *ngIf="name.errors && f.submitted">
+                <div *ngIf="name.errors['required']">Tool name is required</div>
+                <div *ngIf="name.errors['minlength']">
+                  First name must be at least 2 characters
+                </div>
+                <div *ngIf="name.errors['maxlength']">
+                  First name must be at most 20 characters
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="manufacturing_date">Manufacturing Date</label>
+              <input
+                type="number"
+                class="form-control"
+                name="manufacturing_date"
+                [(ngModel)]="form.manufacturing_date"
+                required
+                pattern="\d{4}"
+                maxlength="4"
+                max="{{ current_year }}"
+                #manufacturing_date="ngModel"
+                [ngClass]="{
+                  'is-invalid': f.submitted && manufacturing_date.errors
+                }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="manufacturing_date.errors && f.submitted"
+              >
+                <div *ngIf="manufacturing_date.errors['required']">
+                  Manufacturing Date is required
+                </div>
+                <div
+                  *ngIf="
+                    manufacturing_date.errors['pattern'] ||
+                    manufacturing_date.errors['maxlength']
+                  "
+                >
+                  Manufacturing Date must be 4 digits year, e.g: 1995
+                </div>
+                <div *ngIf="manufacturing_date.errors['max']">
+                  Manufacturing Date must be smaller than the current year
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="max_time_borrow">*Max Borrow Time (days)</label>
+              <input
+                type="text"
+                class="form-control"
+                name="max_time_borrow"
+                [(ngModel)]="form.max_time_borrow"
+                required
+                pattern="[1-9]\d*"
+                minlength="1"
+                maxlength="20"
+                #max_time_borrow="ngModel"
+                [ngClass]="{
+                  'is-invalid': f.submitted && max_time_borrow.errors
+                }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="max_time_borrow.errors && f.submitted"
+              >
+                <div *ngIf="max_time_borrow.errors['required']">
+                  Max Borrow Time is required
+                </div>
+                <div *ngIf="max_time_borrow.errors['minlength']">
+                  Max Borrow Time must be at least 1 day
+                </div>
+                <div *ngIf="max_time_borrow.errors['pattern']">
+                  Max Borrow Time must be at least 1 day
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="categories">Categories</label>
+              <input
+                type="text"
+                class="form-control"
+                name="categories"
+                [(ngModel)]="form.categories"
+                maxlength="50"
+                #categories="ngModel"
+                [ngClass]="{ 'is-invalid': f.submitted && categories.errors }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="categories.errors && f.submitted"
+              >
+                <div *ngIf="categories.errors['maxlength']">
+                  Categories must be at most 20 characters
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="producer">Producer</label>
+              <input
+                type="text"
+                class="form-control"
+                name="producer"
+                [(ngModel)]="form.producer"
+                maxlength="20"
+                #producer="ngModel"
+                [ngClass]="{ 'is-invalid': f.submitted && producer.errors }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="producer.errors && f.submitted"
+              >
+                <div *ngIf="producer.errors['maxlength']">
+                  Producer must be at most 20 characters
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="description">Decription</label>
+              <input
+                type="text"
+                class="form-control"
+                name="description"
+                [(ngModel)]="form.description"
+                maxlength="20"
+                #description="ngModel"
+                [ngClass]="{ 'is-invalid': f.submitted && description.errors }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="description.errors && f.submitted"
+              >
+                <div *ngIf="description.errors['maxlength']">
+                  Decription can be at most 20 characters
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col">
+                <button class="btn btn-danger btn-block" (click)="closePopup()">
+                  Cancel
+                </button>
+              </div>
+              <div class="col">
+                <button
+                  id="btnSubmit"
+                  class="btn btn-primary form-control btn-block"
+                  type="submit"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

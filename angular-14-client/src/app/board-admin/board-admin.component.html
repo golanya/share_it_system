@@ -1,0 +1,154 @@
+<div class="container">
+  <aside class="w-100 mt-0">
+    <div class="alert alert-success w-100" [@fade]="isActionSucceed">
+      {{ action_msg }}
+    </div>
+
+    <div class="alert alert-danger w-100" [@fade]="isActionFailed">
+      {{ action_msg }}
+    </div>
+  </aside>
+
+  <div class="table">
+    <nav aria-label="breadcrumb" class="main-breadcrumb">
+      <ol class="breadcrumb">
+        <h3>Admin page</h3>
+      </ol>
+      <div class="row">
+        <div class="col-4">
+          <div class="card border-info mb-3 h-100">
+            <div class="card-header">General information</div>
+            <div class="card-body text-info">
+              <h5 class="card-title">System updated information</h5>
+              <table class="table mt-4">
+                <tbody>
+                  <tr>
+                    <th class="text-muted" scope="row">Total active users:</th>
+                    <td class="text-info">{{ system_info.total_users }}</td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted" scope="row">Total tools:</th>
+                    <td class="text-info">{{ system_info.total_tools }}</td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted" scope="row">Total notifications:</th>
+                    <td class="text-info">
+                      {{ system_info.total_notifications }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th class="text-muted" scope="row">Pending requests:</th>
+                    <td class="text-info">
+                      {{ system_info.pending_requests }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-8">
+          <div class="card border-info mb-3 h-100">
+            <div class="card-header">Borrows information</div>
+            <div class="card-body text-info">
+              <h5 class="card-title">Active borrows list</h5>
+              <app-generic-table
+                class="w-100"
+                [table_attrs]="active_borrows_attr"
+                [headers2model_attr]="headers2model_attr"
+                [err_msg]="err_msg"
+                [functions]="active_borrows_functions"
+              ></app-generic-table>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      <div class="row mt-4">
+        <div class="col-3">
+          <div class="card border-primary mb-3 h-100">
+            <div class="card-header">Organization code</div>
+            <div class="card-body text-primary">
+              <h5 class="card-title">Set organiztion code</h5>
+              <form
+                name="organization_form"
+                (ngSubmit)="f.form.valid && onSetOrganizationCode()"
+                #f="ngForm"
+                novalidate
+              >
+                <div class="form-group mt-3">
+                  <p class="text-muted">In order to keep outer people entring this organization sharing system keep in mind that replacing the code often is required</p>
+                  <label for="organization_code">Enter organization code</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="organization_code"
+                    [(ngModel)]="organization_form.organization_code"
+                    required
+                    minlength="6"
+                    maxlength="20"
+                    #organization_code="ngModel"
+                    [ngClass]="{
+                      'is-invalid': f.submitted && organization_code.errors
+                    }"
+                  />
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="organization_code.errors && f.submitted"
+                  >
+                    <div *ngIf="organization_code.errors['required']">
+                      Organization code is required
+                    </div>
+                    <div *ngIf="organization_code.errors['minlength']">
+                      Organization code must be at least 6 characters
+                    </div>
+                    <div *ngIf="organization_code.errors['maxlength']">
+                      Organization code must be at most 20 characters
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <button class="btn btn-primary btn-block">
+                    Update organization code
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card border-danger mb-3 h-100">
+            <div class="card-header">Inactive users</div>
+            <div class="card-body text-danger">
+              <h5 class="card-title">Suspended users list</h5>
+              <app-generic-table
+                class="w-100"
+                [table_attrs]="suspended_users_attr"
+                [headers2model_attr]="headers2model_attr"
+                [err_msg]="err_msg"
+              ></app-generic-table>
+            </div>
+          </div>
+        </div>
+        <div class="col-5">
+          <div class="card border-danger mb-3 h-100">
+            <div class="card-header">Invactive users</div>
+            <div class="card-body text-danger">
+              <h5 class="card-title">Deleted users list</h5>
+              <app-generic-table
+                class="w-100"
+                [table_attrs]="deleted_users_attr"
+                [headers2model_attr]="headers2model_attr"
+                [err_msg]="err_msg"
+                [functions]="deleted_users_functions"
+              ></app-generic-table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+      </div>
+    </nav>
+  </div>
+</div>

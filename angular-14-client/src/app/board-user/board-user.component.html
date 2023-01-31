@@ -1,0 +1,62 @@
+<div class="container">
+  <aside class="w-100 mt-0">
+    <div class="alert alert-success w-100" [@fade]="isActionSucceed">
+      {{ action_msg }}
+    </div>
+
+    <div class="alert alert-danger w-100" [@fade]="isActionFailed">
+      {{ action_msg }}
+    </div>
+  </aside>
+
+  <div class="table">
+    <nav aria-label="breadcrumb" class="main-breadcrumb">
+      <ol class="breadcrumb mx-4">
+        <h3>Users list</h3>
+      </ol>
+    </nav>
+    <div class="form-row mx-3 d-flex justify-content-center">
+      <form
+        class="col-md-10 form-row mx-3 mt-4 d-flex justify-content-center"
+        name="form"
+        (ngSubmit)="search_regex()"
+        #f="ngForm"
+        novalidate
+      >
+        <div class="col-md-7">
+          <input
+            class="form-control mt-2"
+            type="text"
+            name="search"
+            placeholder="Search"
+            aria-label="Search"
+            [(ngModel)]="search_pattern"
+            #search="ngModel"
+            [ngClass]="{
+              'is-invalid': f.submitted && false
+            }"
+          />
+        </div>
+        <div class="col-3">
+          <button
+            id="btnSubmit"
+            type="submit"
+            class="btn btn-outline-primary w-100 mt-2"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="row mx-3 mt-5">
+      <app-generic-table
+        class="w-100"
+        [table_attrs]="table_attrs"
+        [headers2model_attr]="headers2model_attr"
+        [err_msg]="err_msg"
+        [functions]="functions"
+      ></app-generic-table>
+    </div>
+  </div>
+</div>
