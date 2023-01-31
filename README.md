@@ -1,5 +1,7 @@
 # MEAN stack lending and borrowing tools management system
 
+'My Movie.mp4' its a short video to decribe Admin view, the proccess of borrowing a tool from one user to another + rating behavior in the end of the loan.
+
 ## Install dependencies
 #### Server
 Enter `node-js-server` folder
